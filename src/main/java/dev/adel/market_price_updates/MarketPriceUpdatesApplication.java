@@ -8,10 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MarketPriceUpdatesApplication {
 
-	void main() {
+	public static void main(String[] args) {
 		log.info("Starting MarketPriceUpdatesApplication...");
-		SpringApplication.run(MarketPriceUpdatesApplication.class);
-		log.info("MarketPriceUpdatesApplication started successfully.");
+		SpringApplication.run(MarketPriceUpdatesApplication.class, args);		log.info("MarketPriceUpdatesApplication started successfully.");
 	}
 
 }
