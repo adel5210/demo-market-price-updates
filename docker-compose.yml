@@ -1,0 +1,17 @@
+version: '1'
+services:
+  mini-chat:
+    container_name: demo-market-price-update
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: demo-market-price-update:latest
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 8443:8443
+    networks:
+      - demo-market-price-update-network
+networks:
+  demo-market-price-update-network:
+    driver: bridge
