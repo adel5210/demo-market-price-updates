@@ -1,16 +1,26 @@
-# Stage 1: Build using Maven and JDK 25
-FROM maven:3.9.9-eclipse-temurin-25 AS build
+# Stage 1: Build using the official Temurin JDK 25 image
+FROM eclipse-temurin:25-jdk-jammy AS build
 WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
 
-# Stage 2: Runtime using a slim JRE 25 image
+# Copy the wrapper and pom first to leverage Docker layer caching
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
+RUN chmod +x mvnw
+# This will download dependencies without building the whole app yet
+RUN ./mvnw dependency:go-offline
+
+# Now copy source and build
+COPY src ./src
+RUN ./mvnw clean package -DskipTests
+
+# Stage 2: Tiny runtime image
 FROM eclipse-temurin:25-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# Render uses the PORT environment variable
+# Render Port
 EXPOSE 8080
 
-# Tune memory for Render's Free Tier (512MB RAM)
-ENTRYPOINT ["java", "-Xmx384m", "-Xms256m", "-jar", "app.jar"]
+# Performance Tuning for Render's 512MB RAM
+# Since you're doing price updates, you might need room for off-heap memory
+ENTRYPOINT ["java", "-Xmx350m", "-Xss512k", "-XX:+UseZGC", "-jar", "app.jar"]
